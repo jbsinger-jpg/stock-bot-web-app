@@ -1,42 +1,98 @@
 require('dotenv').config();
 
 const express = require('express');
-const { Pool } = require('pg'); // Correctly import Pool from pg
+const { Pool } = require('pg');
 const cors = require('cors');
 const app = express();
 const ex_port = 8081;
-
+const fs = require('fs').promises
+const path = require('path')
 
 app.use(cors());
 
-// Create a pool of connections to the PostgreSQL database
 const db = new Pool({
     host: 'localhost',
-    user: 'postgres', // Ensure you specify the user if needed
+    user: 'postgres',
     password: process.env.PASSWORD,
     database: 'postgres',
     port: 5432
 });
 
-// Test route
+// Test valid conenction
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-// Route to fetch stock results
-app.get('/stock_results', async (request, response) => {
-    const sql = "SELECT * FROM postgres.dbo.stock_results"; // Corrected SQL query
+app.get('/stock_results/top_10_bullish_stocks', async (request, response) => {
+    const file_path = path.join(
+        __dirname, 
+        'sql_scripts', 
+        'top_10_bullish_stocks.sql'
+    );
 
     try {
-        // Use the pool to query the database
+        const sql = await fs.readFile(file_path, 'utf-8');
         const data = await db.query(sql);
-        return response.json(data.rows); // Send the rows back to the client
+
+        return response.json(data.rows);
     } catch (err) {
-        return response.status(500).json(err); // Return error if query fails
+        console.error('Error:', err);
+        return response.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+
+app.get('/stock_results/all_bullish_stocks', async (request, response) => {
+    const file_path = path.join(
+        __dirname, 
+        'sql_scripts', 
+        'all_bullish_stocks.sql'
+    )
+
+    const sql = await fs.readFile(file_path, 'utf-8')
+    
+    try {
+        const data = await db.query(sql);
+        return response.json(data.rows);
+    } catch (err) {
+        return response.status(500).json(err);
+    }
+});
+
+app.get('/stock_results/top_10_bearish_stocks', async (request, response) => {
+    const file_path = path.join(
+        __dirname, 
+        'sql_scripts', 
+        'top_10_bearish_stocks.sql'
+    )
+    const sql = await fs.readFile(file_path, 'utf-8');
+
+    try {
+        const data = await db.query(sql);
+        return response.json(data.rows);
+    } catch (err) {
+        return response.status(500).json(err);
+    }
+});
+
+app.get('/all_bearish_stocks', async (request, response) => {
+    const file_path = path.join(
+        __dirname, 
+        'sql_scripts', 
+        'all_bearish_stocks.sql'
+    )    
+    const sql = await fs.readFile(file_path, 'utf-8');;
+
+    try {
+        const data = await db.query(sql);
+
+        return response.json(data.rows);
+    } catch (err) {
+        return response.status(500).json(err);
     }
 });
 
 // Start the server
 app.listen(ex_port, () => {
-  console.log(`Example app listening on port ${ex_port}`);
+  console.log(`Listening on port ${ex_port}`);
 });

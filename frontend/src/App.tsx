@@ -14,9 +14,9 @@ export default function App() {
   // Function to fetch the data from the backend
   const getData = async () => {
     try {
-      const response = await fetch('http://localhost:8081/stock_results');
+      const response = await fetch('http://localhost:8081/stock_results/top_10_bullish_stocks');
       const data = await response.json();
-      
+
       setQb(data);  // Assuming data is an array
     } catch (error) {
       console.log(error);
