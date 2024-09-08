@@ -75,7 +75,7 @@ app.get('/stock_results/top_10_bearish_stocks', async (request, response) => {
     }
 });
 
-app.get('/all_bearish_stocks', async (request, response) => {
+app.get('/stock_results/all_bearish_stocks', async (request, response) => {
     const file_path = path.join(
         __dirname, 
         'sql_scripts', 
